@@ -14,4 +14,4 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('post',[HomeController::class, 'index']);
+Route::resource('post',HomeController::class);

@@ -3,8 +3,8 @@
 @section('content')
 <div class="container">
     <div class="card">
-        <div class="card-header">
-          Featured
+        <div class="card-header text-center">
+          Contents
         </div>
         <div class="card-body">
             @foreach ($data as $post)
