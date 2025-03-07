@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
+use App\Http\Requests\StorePostRequest;
 
 class HomeController extends Controller
 {
@@ -13,9 +14,16 @@ class HomeController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+    // Naming Routing
+    // public function testRoute()
+    // {
+    //     dd('Route is working');
+    // }
+
     public function index()
     {
-        $data = Post::all(); //eloquent model
+        $data = Post::orderBy('id', 'desc')->get(); //eloquent model
         // dd($data);//die dump
         return view('index', compact('data'));
         }
@@ -36,12 +44,21 @@ class HomeController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(StorePostRequest $request)
     {
-        $post = new Post;
-        $post->name=$request->name;
-        $post->description=$request->description;
-        $post->save();
+        // $validated = $request->validate
+        //     'name' => 'required|unique:posts|max:255',
+        //     'description' => 'required',
+        // ]);
+        // $post = new Post;
+        // $post->name=$request->name;
+        // $post->description=$request->description;
+        // $post->save();
+
+        Post::create([
+            'name'=>$request->name,
+            'description'=>$request->description,
+        ]);
 
         return Redirect::to('post');
     }
@@ -52,9 +69,10 @@ class HomeController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Post $post)
     {
-        $post = Post::findOrFail($id);
+        // $post = Post::findOrFail($id); POST method
+        dd($post->categories);
         return view('show', compact('post'));
     }
 
@@ -64,9 +82,9 @@ class HomeController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Post $post)
     {
-        $post = Post::findOrFail($id);
+        // $post = Post::findOrFail($id); Post Method
         return view('edit', compact('post'));
     }
 
@@ -77,12 +95,21 @@ class HomeController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(StorePostRequest $request, Post $post)
     {
-        $post = Post::findOrFail($id);
-        $post->name=$request->name;
-        $post->description=$request->description;
-        $post->save();
+        // $post = Post::findOrFail($id); Post Method
+        // $validated = $request->validate([
+        //     'name' => 'required|unique:posts|max:255',
+        //     'description' => 'required',
+        // ]);
+        // $post->name=$request->name;
+        // $post->description=$request->description;
+        // $post->save();
+
+        $post->update([
+            'name'=>$request->name,
+            'description'=>$request->description,
+        ]);
         return Redirect::to('post');
     }
     /**
@@ -91,9 +118,11 @@ class HomeController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Post $post) //Route Model Binding
     {
-        $post = Post::findOrFail($id)->delete();
+
+        // $post = Post::findOrFail($id)->delete(); Post Method
+        $post->delete();
         return Redirect::to('post');
     }
 }

@@ -14,5 +14,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::get('/', [HomeController::class, 'testRoute'])->name('root');//Naming Routing
+
 Route::resource('post',HomeController::class);
 

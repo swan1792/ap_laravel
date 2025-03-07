@@ -3,6 +3,7 @@
 @section('content')
 <div class="container">
     <div class="mb-3">
+        {{-- <a href="{{route('root')}}" class="btn btn-success active fw-bold">Go to testRoute</a> Naming Routing --}}
         <a href="/post/create" class="btn btn-success active fw-bold">New Post</a>
     </div>
     <div class="card">
