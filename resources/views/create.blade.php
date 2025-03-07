@@ -24,6 +24,14 @@
             <div class="form-floating">
                 <textarea class="form-control" placeholder="Leave your description here" id="floatingTextarea2" style="height: 100px" name="description">{{old('description')}}</textarea>
                 <label for="description" >Description</label>
+            </div><br>
+            <div class="block">
+                <select name="category_id" id="">
+                    <option value="">Select Category</option>
+                    @foreach ($categories as $category)
+                        <option value="{{$category->id}}">{{$category->name}}</option>
+                    @endforeach
+                </select>
             </div>
             <div class="mt-3">
                 <button type="submit" class="btn btn-primary active fw-bold" >Submit</button>
