@@ -21,6 +21,11 @@ class HomeController extends Controller
     //     dd('Route is working');
     // }
 
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     public function index()
     {
         $data = Post::orderBy('id', 'desc')->get(); //eloquent model
@@ -63,10 +68,6 @@ class HomeController extends Controller
         // ]);
         $validated = $request->validated();
         Post::create($validated);
-
-
-
-
         return Redirect::to('post');
     }
 

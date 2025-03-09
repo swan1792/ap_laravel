@@ -5,6 +5,7 @@
     <div class="mb-3">
         {{-- <a href="{{route('root')}}" class="btn btn-success active fw-bold">Go to testRoute</a> Naming Routing --}}
         <a href="/post/create" class="btn btn-success active fw-bold">New Post</a>
+        <a href="logout" class="btn btn-info">Log Out</a>
     </div>
     <div class="card">
         <div class="card-header text-center">
