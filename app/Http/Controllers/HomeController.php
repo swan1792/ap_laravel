@@ -6,6 +6,7 @@ use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use App\Http\Requests\StorePostRequest;
+use App\Http\Middleware\Authenticate;
 
 class HomeController extends Controller
 {
@@ -28,7 +29,7 @@ class HomeController extends Controller
 
     public function index()
     {
-        $data = Post::orderBy('id', 'desc')->get(); //eloquent model
+        $data = Post::where('user_id',auth()->id())->orderBy('id', 'desc')->get(); //eloquent model
         // dd($data);//die dump
         return view('index', compact('data'));
         }
@@ -81,7 +82,11 @@ class HomeController extends Controller
     {
         // $post = Post::findOrFail($id); POST method
         // dd($post->categories); one to many relationship
+    // if($post->user_id != auth()->id()){
+    //     abort(403);
+    // }
 
+    $this->authorize('view', $post);
         return view('show', compact('post'));
     }
 
@@ -94,6 +99,9 @@ class HomeController extends Controller
     public function edit(Post $post)
     {
         // $post = Post::findOrFail($id); Post Method
+        if($post->user_id != auth()->id()){
+            abort(403);
+        }
         $categories = Category::all();
         return view('edit', compact('post','categories'));
     }
