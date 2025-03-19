@@ -1,12 +1,14 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\Category;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Middleware\Authenticate;
+use Illuminate\Support\Facades\Mail;
 
 class HomeController extends Controller
 {
@@ -15,13 +17,6 @@ class HomeController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-
-    // Naming Routing
-    // public function testRoute()
-    // {
-    //     dd('Route is working');
-    // }
-
     public function __construct()
     {
         $this->middleware('auth');
@@ -29,10 +24,21 @@ class HomeController extends Controller
 
     public function index()
     {
-        $data = Post::where('user_id',auth()->id())->orderBy('id', 'desc')->get(); //eloquent model
-        // dd($data);//die dump
-        return view('index', compact('data'));
+        try {
+            // Send a test email
+            Mail::raw('Hello World', function ($msg) {
+                $msg->to('swan@gmail.com')->subject('Test Email');
+            });
+        } catch (\Exception $e) {
+            // Debugging purpose if email fails
+            dd('Mail Error: ' . $e->getMessage());
         }
+
+        // Fetch posts for the authenticated user
+        $data = Post::where('user_id', auth()->id())->orderBy('id', 'desc')->get();
+
+        return view('index', compact('data'));
+    }
 
     /**
      * Show the form for creating a new resource.
@@ -48,102 +54,79 @@ class HomeController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Http\Requests\StorePostRequest  $request
      * @return \Illuminate\Http\Response
      */
     public function store(StorePostRequest $request)
     {
-        // $validated = $request->validate
-        //     'name' => 'required|unique:posts|max:255',
-        //     'description' => 'required',
-        // ]);
-        // $post = new Post;
-        // $post->name=$request->name;
-        // $post->description=$request->description;
-        // $post->save();
-
-    // Post::create([
-        //     'name'=>$request->name,
-        //     'description'=>$request->description,
-        //     'category_id'=>$request->category,
-        // ]);
+        // Validate and store the post
         $validated = $request->validated();
+        $validated['user_id'] = auth()->id(); // Assign the logged-in user's ID
         Post::create($validated);
-        return Redirect::to('post');
+
+        return redirect()->route('post.index')->with('status', 'Post created successfully!');
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  \App\Models\Post  $post
      * @return \Illuminate\Http\Response
      */
     public function show(Post $post)
     {
-        // $post = Post::findOrFail($id); POST method
-        // dd($post->categories); one to many relationship
-    // if($post->user_id != auth()->id()){
-    //     abort(403);
-    // }
-
-    $this->authorize('view', $post);
+        // Check if the user is authorized to view this post
+        $this->authorize('view', $post);
         return view('show', compact('post'));
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
+     * @param  \App\Models\Post  $post
      * @return \Illuminate\Http\Response
      */
     public function edit(Post $post)
     {
-        // $post = Post::findOrFail($id); Post Method
-        if($post->user_id != auth()->id()){
+        // Ensure the authenticated user is the owner of the post
+        if ($post->user_id != auth()->id()) {
             abort(403);
         }
+
         $categories = Category::all();
-        return view('edit', compact('post','categories'));
+        return view('edit', compact('post', 'categories'));
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  \App\Http\Requests\StorePostRequest  $request
+     * @param  \App\Models\Post  $post
      * @return \Illuminate\Http\Response
      */
     public function update(StorePostRequest $request, Post $post)
     {
-        // $post = Post::findOrFail($id); Post Method
-        // $validated = $request->validate([
-        //     'name' => 'required|unique:posts|max:255',
-        //     'description' => 'required',
-        // ]);
-        // $post->name=$request->name;
-        // $post->description=$request->description;
-        // $post->save();
-
-        // $post->update([
-        //     'name'=>$request->name,
-        //     'description'=>$request->description,
-
-        // ]);
+        // Validate and update the post
         $validated = $request->validated();
         $post->update($validated);
-        return Redirect::to('post');
+
+        return redirect()->route('post.index')->with('status', 'Post updated successfully!');
     }
+
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  \App\Models\Post  $post
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Post $post) //Route Model Binding
+    public function destroy(Post $post)
     {
+        // Ensure the authenticated user is the owner of the post
+        if ($post->user_id !== auth()->id()) {
+            abort(403, 'Unauthorized action.');
+        }
 
-        // $post = Post::findOrFail($id)->delete(); Post Method
         $post->delete();
-        return Redirect::to('post');
+        return redirect()->route('post.index')->with('status', 'Post deleted successfully!');
     }
 }

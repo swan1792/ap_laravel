@@ -13,6 +13,12 @@
         <div class="card-header text-center">
           Contents
         </div>
+        @if (session('status'))
+        <div class="alert alert-success">
+        {{ session('status') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        @endif
         <div class="card-body">
             @foreach ($data as $post)
             <h5 class="card-title"> {{$post->name}} </h5>
