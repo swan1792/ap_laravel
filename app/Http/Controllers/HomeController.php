@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Middleware\Authenticate;
+use App\Mail\PostStored;
 use Illuminate\Support\Facades\Mail;
 
 class HomeController extends Controller
@@ -24,15 +25,15 @@ class HomeController extends Controller
 
     public function index()
     {
-        try {
-            // Send a test email
-            Mail::raw('Hello World', function ($msg) {
-                $msg->to('swan@gmail.com')->subject('Test Email');
-            });
-        } catch (\Exception $e) {
-            // Debugging purpose if email fails
-            dd('Mail Error: ' . $e->getMessage());
-        }
+        // try {
+        //     // Send a test email
+        //     Mail::raw('Hello World', function ($msg) {
+        //         $msg->to('swan@gmail.com')->subject('Test Email');
+        //     });
+        // } catch (\Exception $e) {
+        //     // Debugging purpose if email fails
+        //     dd('Mail Error: ' . $e->getMessage());
+        // }
 
         // Fetch posts for the authenticated user
         $data = Post::where('user_id', auth()->id())->orderBy('id', 'desc')->get();
@@ -62,8 +63,8 @@ class HomeController extends Controller
         // Validate and store the post
         $validated = $request->validated();
         $validated['user_id'] = auth()->id(); // Assign the logged-in user's ID
-        Post::create($validated);
-
+        $post = Post::create($validated);
+        Mail::to('shn@gmail.com')->send(new PostStored($post));
         return redirect()->route('post.index')->with('status', 'Post created successfully!');
     }
 
